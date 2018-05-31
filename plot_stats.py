@@ -3,6 +3,10 @@
 import pandas as pnd
 import matplotlib.pyplot as plt
 
+def var(df, name):
+    '''Computes variations from previous row for column name'''
+    df[name + '_var'] = df[name] - df[name].shift(1)
+
 def psplot(columns, legend, area=False, **kwargs):
     '''Standard plotting function
 
@@ -39,7 +43,12 @@ if __name__ == '__main__':
     df['total'] = \
     df.apply(lambda row: row.total_nonprop + row.total_prop, axis=1)
 
+    # Add variations
+    for column in df:
+        var(df, column)
+
     # Print the frame
+    pnd.set_option('display.max_columns', None)
     print(df)
 
     # All info stacked
