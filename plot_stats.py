@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def var(df, name):
     '''Computes variations from previous row for column name'''
-    df[name + '_var'] = df[name] - df[name].shift(1)
+    df['D_' + name] = df[name] - df[name].shift(1)
 
 def psplot(columns, legend, area=False, **kwargs):
     '''Standard plotting function
@@ -46,6 +46,18 @@ if __name__ == '__main__':
     # Add variations
     for column in df:
         var(df, column)
+
+    # Checks
+    df['d_all_neg_quit'] =\
+    df.apply(lambda row: - row.D_all_neg - row.D_rect, axis=1)
+
+    df['d_wait_quit'] =\
+    df.apply(lambda row: row.D_quit_nonprop + row.D_all_neg + row.D_rect,
+             axis=1)
+
+    df['d_admitted'] =\
+    df.apply(lambda row: - row.D_wait - row.D_quit_nonprop -
+             row.D_all_neg - row.D_rect, axis=1)
 
     # Print the frame
     pnd.set_option('display.max_columns', None)
