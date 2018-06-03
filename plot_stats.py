@@ -7,6 +7,9 @@ def var(df, name):
     '''Computes variations from previous row for column name'''
     df['D_' + name] = df[name] - df[name].shift(1)
 
+def perc(df, name):
+    df['p_' + name] = df[name] * 100 / df['total']
+
 def psplot(columns, legend, area=False, **kwargs):
     '''Standard plotting function
 
@@ -28,36 +31,35 @@ if __name__ == '__main__':
 
     # Sums all propositions columns
     df['total_prop'] = \
-    df.apply(lambda row: row.acc_def + row.acc_nondef + row.quit_prop, axis=1)
+    df.acc_def + df.acc_nondef + df.quit_prop
 
     # Sums all non propositions columns
-    df['total_nonprop'] = \
-    df.apply(lambda row: row.wait + row.rect + row.quit_nonprop +
-             row.all_neg, axis=1)
+    df['total_nonprop'] = df.wait + df.rect + df.quit_nonprop + df.all_neg
+
+    df['total_quit'] = df.quit_prop + df.quit_nonprop
 
     # All negatives + rectorat
-    df['all_neg_or_rect'] = \
-    df.apply(lambda row: row.rect + row.all_neg, axis=1)
+    df['all_neg_or_rect'] = df.rect + df.all_neg
+
+    df['total_dismissed'] = df.all_neg_or_rect + df.total_quit
+
+    df['wants_better'] = df.wait + df.acc_nondef
 
     # Grand total
-    df['total'] = \
-    df.apply(lambda row: row.total_nonprop + row.total_prop, axis=1)
+    df['total'] = df.total_nonprop + df.total_prop
 
     # Add variations
     for column in df:
         var(df, column)
+        perc(df, column)
 
     # Checks
-    df['d_all_neg_quit'] =\
-    df.apply(lambda row: - row.D_all_neg - row.D_rect, axis=1)
+    df['d_all_neg_quit'] = - df.D_all_neg - df.D_rect
 
-    df['d_wait_quit'] =\
-    df.apply(lambda row: row.D_quit_nonprop + row.D_all_neg + row.D_rect,
-             axis=1)
+    df['d_wait_quit'] = df.D_quit_nonprop + df.D_all_neg + df.D_rect
 
-    df['d_admitted'] =\
-    df.apply(lambda row: - row.D_wait - row.D_quit_nonprop -
-             row.D_all_neg - row.D_rect, axis=1)
+    df['d_admitted'] = \
+    - df.D_wait - df.D_quit_nonprop - df.D_all_neg - df.D_rect
 
     # Print the frame
     pnd.set_option('display.max_columns', None)
