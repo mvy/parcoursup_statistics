@@ -10,7 +10,7 @@ def var(df, name):
 def perc(df, name):
     df['p_' + name] = df[name] * 100 / df['total']
 
-def psplot(columns, legend, area=False, **kwargs):
+def psplot(columns, legend, area=False, filename=None, **kwargs):
     '''Standard plotting function
 
     columns: name of the columns to add on the graph.
@@ -24,6 +24,9 @@ def psplot(columns, legend, area=False, **kwargs):
         ax = df[columns].plot.area(figsize=(12, 12), **kwargs)
     ax.legend(legend, loc="center left", bbox_to_anchor=(1, 0.5))
     ax.set_ylabel('Nombre d\'étudiants')
+
+    if filename is not None:
+        plt.savefig('last_figures/' + filename,  bbox_inches = 'tight')
 
 if __name__ == '__main__':
     df = pnd.read_csv('parcoursup.csv', sep=';', header=0, index_col=0,
@@ -71,26 +74,31 @@ if __name__ == '__main__':
            ['Acceptations définitives', 'Acceptations non définitives',
             'Quitté avec proposition', 'En attente', 'Demandes rectorat',
             'Toutes négatives', 'Quitté sans proposition'], area=True,
-            stacked=True)
+            stacked=True, filename='all_stacked.png')
 
     # All info not stacked
     psplot(["acc_def", "acc_nondef", "quit_prop", "wait", "rect", "all_neg",
             "quit_nonprop"],
            ['Acceptations définitives', 'Acceptations non définitives',
             'Quitté avec proposition', 'En attente', 'Demandes rectorat',
-            'Toutes négatives', 'Quitté sans proposition'])
+            'Toutes négatives', 'Quitté sans proposition'],
+            filename='all_curves.png')
 
     # Acceptations and waiting students
     psplot(["acc_def", "acc_nondef", "wait"],
            ['Acceptations définitives', 'Acceptations non définitives',
-             'En attente'])
+             'En attente'], filename='acc_wait.png')
 
     # Acceptations and waiting students (stacked)
     psplot(["acc_def", "acc_nondef", "wait"],
            ['Acceptations définitives', 'Acceptations non définitives',
-             'En attente'], area=True, stacked=True)
+             'En attente'], area=True, stacked=True,
+            filename='acc_wait_stacked.png')
 
     # Rejections
     psplot(["quit_prop", "rect", "all_neg", "quit_nonprop"],
            ['Quitté avec proposition','Demandes rectorat',
-            'Toutes négatives', 'Quitté sans proposition'])
+            'Toutes négatives', 'Quitté sans proposition'],
+            filename='rejections.png')
+
+    psplot(['D_wait'], ["Variation list d'attente"])
