@@ -13,7 +13,7 @@ def perc(df, name):
 def absolute(df, name):
     df['abs_' + name] = abs(df[name])
 
-def psplot(columns, legend, area=False, filename=None, **kwargs):
+def psplot(columns, area=False, filename=None, **kwargs):
     '''Standard plotting function
 
     columns: name of the columns to add on the graph.
@@ -25,6 +25,9 @@ def psplot(columns, legend, area=False, filename=None, **kwargs):
         ax = df[columns].plot(figsize=(12, 12), **kwargs)
     else:
         ax = df[columns].plot.area(figsize=(12, 12), **kwargs)
+    
+    legend = [titles[col] for col in columns]
+        
     ax.legend(legend, loc="center left", bbox_to_anchor=(1, 0.5))
     ax.set_ylabel('Nombre d\'étudiants')
 
@@ -75,42 +78,39 @@ if __name__ == '__main__':
     pnd.set_option('display.max_columns', None)
     print(df)
 
+    titles = {
+            "acc_def": 'Acceptations définitives',
+            "acc_nondef": 'Acceptations non définitives',
+            "quit_prop": 'Quitté avec proposition', 
+            "wait": 'En attente', 
+            "rect": 'Demandes rectorat', 
+            "all_neg": 'Toutes négatives',
+            "quit_nonprop": 'Quitté sans proposition',
+            "abs_D_acc_def": "Variation absolue d'acceptations définitives",
+            "abs_D_wait": "Variation absolue liste d'attente"
+            }
+
     # All info stacked
     psplot(["acc_def", "acc_nondef", "quit_prop", "wait", "rect", "all_neg",
-            "quit_nonprop"],
-           ['Acceptations définitives', 'Acceptations non définitives',
-            'Quitté avec proposition', 'En attente', 'Demandes rectorat',
-            'Toutes négatives', 'Quitté sans proposition'], area=True,
-            stacked=True, filename='all_stacked.png')
+            "quit_nonprop"], area=True, stacked=True, 
+        filename='all_stacked.png')
 
     # All info not stacked
     psplot(["acc_def", "acc_nondef", "quit_prop", "wait", "rect", "all_neg",
-            "quit_nonprop"],
-           ['Acceptations définitives', 'Acceptations non définitives',
-            'Quitté avec proposition', 'En attente', 'Demandes rectorat',
-            'Toutes négatives', 'Quitté sans proposition'],
-            filename='all_curves.png')
+            "quit_nonprop"], filename='all_curves.png')
 
     # Acceptations and waiting students
-    psplot(["acc_def", "acc_nondef", "wait"],
-           ['Acceptations définitives', 'Acceptations non définitives',
-             'En attente'], filename='acc_wait.png')
+    psplot(["acc_def", "acc_nondef", "wait"], filename='acc_wait.png')
 
     # Acceptations and waiting students (stacked)
-    psplot(["acc_def", "acc_nondef", "wait"],
-           ['Acceptations définitives', 'Acceptations non définitives',
-             'En attente'], area=True, stacked=True,
+    psplot(["acc_def", "acc_nondef", "wait"], area=True, stacked=True,
             filename='acc_wait_stacked.png')
 
     # Rejections
     psplot(["quit_prop", "rect", "all_neg", "quit_nonprop"],
-           ['Quitté avec proposition','Demandes rectorat',
-            'Toutes négatives', 'Quitté sans proposition'],
             filename='rejections.png')
 
     psplot(['abs_D_acc_def', 'abs_D_wait'],
-           ["Variation acceptations définitives", "Variation absolue liste d'attente"],
            kind='bar', filename='acc_wait_vars_bars.png')
     psplot(['abs_D_acc_def', 'abs_D_wait'],
-           ["Variation acceptations définitives", "Variation absolue liste d'attente"],
            filename='acc_wait_vars.png')
