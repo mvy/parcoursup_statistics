@@ -10,6 +10,9 @@ def var(df, name):
 def perc(df, name):
     df['p_' + name] = df[name] * 100 / df['total']
 
+def absolute(df, name):
+    df['abs_' + name] = abs(df[name])
+
 def psplot(columns, legend, area=False, filename=None, **kwargs):
     '''Standard plotting function
 
@@ -56,6 +59,10 @@ if __name__ == '__main__':
         var(df, column)
         perc(df, column)
 
+    # Computes absolutes for each columns (graph purposes)
+    for column in df:
+        absolute(df, column)
+
     # Checks
     df['d_all_neg_quit'] = - df.D_all_neg - df.D_rect
 
@@ -101,4 +108,9 @@ if __name__ == '__main__':
             'Toutes négatives', 'Quitté sans proposition'],
             filename='rejections.png')
 
-    psplot(['D_wait'], ["Variation list d'attente"])
+    psplot(['abs_D_acc_def', 'abs_D_wait'],
+           ["Variation acceptations définitives", "Variation absolue liste d'attente"],
+           kind='bar', filename='acc_wait_vars_bars.png')
+    psplot(['abs_D_acc_def', 'abs_D_wait'],
+           ["Variation acceptations définitives", "Variation absolue liste d'attente"],
+           filename='acc_wait_vars.png')
