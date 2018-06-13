@@ -39,8 +39,7 @@ if __name__ == '__main__':
                       parse_dates=[0])
 
     # Sums all propositions columns
-    df['total_prop'] = \
-    df.acc_def + df.acc_nondef + df.quit_prop
+    df['total_prop'] = df.acc_def + df.acc_nondef + df.quit_prop
 
     # Sums all non propositions columns
     df['total_nonprop'] = df.wait + df.rect + df.quit_nonprop + df.all_neg
@@ -87,7 +86,9 @@ if __name__ == '__main__':
             "all_neg": 'Toutes négatives',
             "quit_nonprop": 'Quitté sans proposition',
             "abs_D_acc_def": "Variation absolue d'acceptations définitives",
-            "abs_D_wait": "Variation absolue liste d'attente"
+            "abs_D_acc_nondef": "Variation absolue d'acceptations non définitives",
+            "abs_D_wait": "Variation absolue liste d'attente",
+            "lpf_D_acc_def": "EWMA variation d'acceptations définitives"
             }
 
     # All info stacked
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     psplot(["quit_prop", "rect", "all_neg", "quit_nonprop"],
             filename='rejections.png')
 
-    psplot(['abs_D_acc_def', 'abs_D_wait'],
+    psplot(['abs_D_acc_def', 'abs_D_acc_nondef', 'abs_D_wait'],
            kind='bar', filename='acc_wait_vars_bars.png')
-    psplot(['abs_D_acc_def', 'abs_D_wait'],
+    psplot(['abs_D_acc_def', 'abs_D_acc_nondef', 'abs_D_wait'],
            filename='acc_wait_vars.png')
