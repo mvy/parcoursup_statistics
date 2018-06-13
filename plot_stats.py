@@ -25,9 +25,9 @@ def psplot(columns, area=False, filename=None, **kwargs):
         ax = df[columns].plot(figsize=(12, 12), **kwargs)
     else:
         ax = df[columns].plot.area(figsize=(12, 12), **kwargs)
-    
+
     legend = [titles[col] for col in columns]
-        
+
     ax.legend(legend, loc="center left", bbox_to_anchor=(1, 0.5))
     ax.set_ylabel('Nombre d\'étudiants')
 
@@ -80,9 +80,9 @@ if __name__ == '__main__':
     titles = {
             "acc_def": 'Acceptations définitives',
             "acc_nondef": 'Acceptations non définitives',
-            "quit_prop": 'Quitté avec proposition', 
-            "wait": 'En attente', 
-            "rect": 'Demandes rectorat', 
+            "quit_prop": 'Quitté avec proposition',
+            "wait": 'En attente',
+            "rect": 'Demandes rectorat',
             "all_neg": 'Toutes négatives',
             "quit_nonprop": 'Quitté sans proposition',
             "abs_D_acc_def": "Variation absolue d'acceptations définitives",
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     # All info stacked
     psplot(["acc_def", "acc_nondef", "quit_prop", "wait", "rect", "all_neg",
-            "quit_nonprop"], area=True, stacked=True, 
+            "quit_nonprop"], area=True, stacked=True,
         filename='all_stacked.png')
 
     # All info not stacked
