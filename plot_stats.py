@@ -31,6 +31,10 @@ def psplot(columns, area=False, filename=None, **kwargs):
     ax.legend(legend, loc="center left", bbox_to_anchor=(1, 0.5))
     ax.set_ylabel('Nombre d\'étudiants')
 
+    bac = ['2018-06-18', '2018-06-25']
+    for xc in bac:
+        plt.axvline(x=xc, color='k', linestyle='--')
+
     if filename is not None:
         plt.savefig('last_figures/' + filename,  bbox_inches = 'tight')
 
@@ -85,10 +89,14 @@ if __name__ == '__main__':
             "rect": 'Demandes rectorat',
             "all_neg": 'Toutes négatives',
             "quit_nonprop": 'Quitté sans proposition',
+            "total_prop": 'Ayant reçu au moins une proposition',
+            "total_nonprop": "N'ayant reçu aucune proposition",
             "abs_D_acc_def": "Variation absolue d'acceptations définitives",
             "abs_D_acc_nondef": "Variation absolue d'acceptations non définitives",
             "abs_D_wait": "Variation absolue liste d'attente",
-            "lpf_D_acc_def": "EWMA variation d'acceptations définitives"
+            "lpf_D_acc_def": "EWMA variation d'acceptations définitives",
+            "abs_D_wants_better": "Variation absolue attente de mieux",
+            "wants_better": "En attente de mieux",
             }
 
     # All info stacked
@@ -101,7 +109,10 @@ if __name__ == '__main__':
             "quit_nonprop"], filename='all_curves.png')
 
     # Acceptations and waiting students
-    psplot(["acc_def", "acc_nondef", "wait"], filename='acc_wait.png')
+    psplot(["acc_def", "acc_nondef", "wait"],
+           filename='acc_wait.png')
+    psplot(["acc_def", "acc_nondef", "wait", "wants_better"],
+           filename='acc_wait_better.png')
 
     # Acceptations and waiting students (stacked)
     psplot(["acc_def", "acc_nondef", "wait"], area=True, stacked=True,
@@ -113,5 +124,10 @@ if __name__ == '__main__':
 
     psplot(['abs_D_acc_def', 'abs_D_acc_nondef', 'abs_D_wait'],
            kind='bar', filename='acc_wait_vars_bars.png')
-    psplot(['abs_D_acc_def', 'abs_D_acc_nondef', 'abs_D_wait'],
+    psplot(['abs_D_acc_def', 'abs_D_acc_nondef', 'abs_D_wait',
+            'abs_D_wants_better'],
            filename='acc_wait_vars.png')
+
+    # Total prop / nonprop
+    psplot(['total_prop', 'total_nonprop'],
+           filename='total_propnprop.png')
