@@ -1,0 +1,8 @@
+#!/bin/bash
+
+date=$1
+
+git add parcoursup.csv
+git commit -m"Add data for $date"
+git add last_figures/*png
+git commit -m"Update images for $date"
