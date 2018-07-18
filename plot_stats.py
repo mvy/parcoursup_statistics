@@ -3,17 +3,17 @@
 import pandas as pnd
 import matplotlib.pyplot as plt
 
-def var(df, name):
+def var(outf, inf, name):
     '''Computes variations from previous row for column name'''
-    df['D_' + name] = df[name] - df[name].shift(1)
+    outf[name] = inf[name] - inf[name].shift(1)
 
-def perc(df, name):
-    df['p_' + name] = df[name] * 100 / df['total']
+def perc(outf, inf, name, ref='total'):
+    outf[name + '_' + ref] = inf[name] * 100 / inf[ref]
 
-def absolute(df, name):
-    df['abs_' + name] = abs(df[name])
+def absolute(outf, inf, name):
+    outf[name] = abs(inf[name])
 
-def psplot(columns, area=False, filename=None, **kwargs):
+def psplot(frame, columns, titles, area=False, filename=None, **kwargs):
     '''Standard plotting function
 
     columns: name of the columns to add on the graph.
@@ -22,9 +22,9 @@ def psplot(columns, area=False, filename=None, **kwargs):
     **kwargs: additional arguments for the plot function'''
     fig = plt.figure();
     if not area:
-        ax = df[columns].plot(figsize=(12, 12), **kwargs)
+        ax = frame[columns].plot(figsize=(12, 12), **kwargs)
     else:
-        ax = df[columns].plot.area(figsize=(12, 12), **kwargs)
+        ax = frame[columns].plot.area(figsize=(12, 12), **kwargs)
 
     legend = [titles[col] for col in columns]
 
@@ -38,6 +38,8 @@ def psplot(columns, area=False, filename=None, **kwargs):
     if filename is not None:
         plt.savefig('last_figures/' + filename,  bbox_inches = 'tight')
 
+    plt.close(fig)
+
 if __name__ == '__main__':
     df = pnd.read_csv('parcoursup.csv', sep=';', header=0, index_col=0,
                       parse_dates=[0])
@@ -48,40 +50,59 @@ if __name__ == '__main__':
     # Sums all non propositions columns
     df['total_nonprop'] = df.wait + df.rect + df.quit_nonprop + df.all_neg
 
+    df['total_acc_inscr']  = df.acc_def + df.acc_nondef
     df['total_quit'] = df.quit_prop + df.quit_nonprop
 
     # All negatives + rectorat
     df['all_neg_or_rect'] = df.rect + df.all_neg
-
+    df['total_nonprop_inscr'] = df.all_neg_or_rect + df.wait
     df['total_dismissed'] = df.all_neg_or_rect + df.total_quit
 
     df['wants_better'] = df.wait + df.acc_nondef
 
     # Grand total
+    df['total_inscr'] = df.total_acc_inscr + df.total_nonprop_inscr
     df['total'] = df.total_nonprop + df.total_prop
+
+    # Variation frame
+    vf = pnd.DataFrame(index=df.index)
+    # Percent frame
+    pf = pnd.DataFrame(index=df.index)
+    # Absolute frame
+    af = pnd.DataFrame(index=df.index)
 
     # Add variations
     for column in df:
-        var(df, column)
-        perc(df, column)
+        var(vf, df, column)
+        perc(pf, df, column)
+
+    for column in ['total_acc_inscr', 'total_nonprop_inscr']:
+        perc(pf, df, column, 'total_inscr')
 
     # Computes absolutes for each columns (graph purposes)
     for column in df:
-        absolute(df, column)
+        absolute(af, vf, column)
 
     # Checks
-    df['d_all_neg_quit'] = - df.D_all_neg - df.D_rect
+    vf['all_neg_quit'] = - vf.all_neg - vf.rect
 
-    df['d_wait_quit'] = df.D_quit_nonprop + df.D_all_neg + df.D_rect
+    df['wait_quit'] = vf.quit_nonprop + vf.all_neg + vf.rect
 
-    df['d_admitted'] = \
-    - df.D_wait - df.D_quit_nonprop - df.D_all_neg - df.D_rect
+    vf['d_admitted'] = \
+    - vf.wait - vf.quit_nonprop - vf.all_neg - vf.rect
 
     # Print the frame
     pnd.set_option('display.max_columns', None)
+    print("# Input and calculated")
     print(df)
+    print("# Variations")
+    print(vf)
+    print('# Percentages')
+    print(pf)
+    print('# Absolute variations')
+    print(af)
 
-    titles = {
+    df_titles = {
             "acc_def": 'Acceptations définitives',
             "acc_nondef": 'Acceptations non définitives',
             "quit_prop": 'Quitté avec proposition',
@@ -91,43 +112,58 @@ if __name__ == '__main__':
             "quit_nonprop": 'Quitté sans proposition',
             "total_prop": 'Ayant reçu au moins une proposition',
             "total_nonprop": "N'ayant reçu aucune proposition",
-            "abs_D_acc_def": "Variation absolue d'acceptations définitives",
-            "abs_D_acc_nondef": "Variation absolue d'acceptations non définitives",
-            "abs_D_wait": "Variation absolue liste d'attente",
-            "lpf_D_acc_def": "EWMA variation d'acceptations définitives",
-            "abs_D_wants_better": "Variation absolue attente de mieux",
             "wants_better": "En attente de mieux",
+            "total_acc_inscr": "Total acceptations inscrits",
+            "total_nonprop_inscr": "Total sans propositions inscrits"
+            }
+
+    vf_titles = {
+            "acc_def": "Variation d'acceptations définitives",
+            "acc_nondef": "Variation d'acceptations non définitives",
+            "wait": "Variation liste d'attente",
+            "wants_better": "Variation attente de mieux",
+            }
+
+    af_titles = {
+            "acc_def": "Variation absolue d'acceptations définitives",
+            "acc_nondef": "Variation absolue d'acceptations non définitives",
+            "wait": "Variation absolue liste d'attente",
+            "wants_better": "Variation absolue attente de mieux",
             }
 
     # All info stacked
-    psplot(["acc_def", "acc_nondef", "quit_prop", "wait", "rect", "all_neg",
-            "quit_nonprop"], area=True, stacked=True,
+    psplot(df, ["acc_def", "acc_nondef", "quit_prop", "wait", "rect", 
+                "all_neg", "quit_nonprop"], df_titles, area=True, stacked=True,
         filename='all_stacked.png')
 
     # All info not stacked
-    psplot(["acc_def", "acc_nondef", "quit_prop", "wait", "rect", "all_neg",
-            "quit_nonprop"], filename='all_curves.png')
+    psplot(df, ["acc_def", "acc_nondef", "quit_prop", "wait", "rect", 
+                "all_neg", "quit_nonprop"], df_titles,
+           filename='all_curves.png')
 
     # Acceptations and waiting students
-    psplot(["acc_def", "acc_nondef", "wait"],
+    psplot(df, ["acc_def", "acc_nondef", "wait"], df_titles,
            filename='acc_wait.png')
-    psplot(["acc_def", "acc_nondef", "wait", "wants_better"],
+    psplot(df, ["acc_def", "acc_nondef", "wait", "wants_better"],df_titles,
            filename='acc_wait_better.png')
 
     # Acceptations and waiting students (stacked)
-    psplot(["acc_def", "acc_nondef", "wait"], area=True, stacked=True,
-            filename='acc_wait_stacked.png')
+    psplot(df, ["acc_def", "acc_nondef", "wait"], df_titles, area=True, 
+           stacked=True, filename='acc_wait_stacked.png')
 
     # Rejections
-    psplot(["quit_prop", "rect", "all_neg", "quit_nonprop"],
+    psplot(df, ["quit_prop", "rect", "all_neg", "quit_nonprop"], df_titles,
             filename='rejections.png')
 
-    psplot(['abs_D_acc_def', 'abs_D_acc_nondef', 'abs_D_wait'],
+    psplot(af, ['acc_def', 'acc_nondef', 'wait'], af_titles,
            kind='bar', filename='acc_wait_vars_bars.png')
-    psplot(['abs_D_acc_def', 'abs_D_acc_nondef', 'abs_D_wait',
-            'abs_D_wants_better'],
+    psplot(af, ['acc_def', 'acc_nondef', 'wait', 'wants_better'], af_titles,
            filename='acc_wait_vars.png')
 
     # Total prop / nonprop
-    psplot(['total_prop', 'total_nonprop'],
+    psplot(df, ['total_prop', 'total_nonprop'],df_titles,
            filename='total_propnprop.png')
+
+    psplot(vf, ['acc_def', 'acc_nondef', 'wait', 'wants_better'], vf_titles)
+
+    psplot(df, ['total_acc_inscr', 'total_nonprop_inscr'], df_titles)
