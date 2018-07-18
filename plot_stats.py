@@ -31,7 +31,7 @@ def psplot(columns, area=False, filename=None, **kwargs):
     ax.legend(legend, loc="center left", bbox_to_anchor=(1, 0.5))
     ax.set_ylabel('Nombre d\'étudiants')
 
-    bac = ['2018-06-18', '2018-06-25', '2018-07-06']
+    bac = ['2018-06-18', '2018-06-25', '2018-07-06', '2018-07-11']
     for xc in bac:
         plt.axvline(x=xc, color='k', linestyle='--')
 
